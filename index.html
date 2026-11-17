@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Habit Grid · daily habit tracker</title>
+    <meta
+      name="description"
+      content="Track daily habits on one grid: tick today, set weekly targets, see a year of history per habit and keep your streaks."
+    />
+    <meta name="theme-color" content="#f5f6f2" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0e1311" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script src="/theme-init.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#board-heading">Skip to this week</a>
+    <header class="topbar">
+      <div class="brand">
+        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+          <rect x="3" y="3" width="7.5" height="7.5" rx="2.2" fill="currentColor" />
+          <rect x="12.25" y="3" width="7.5" height="7.5" rx="2.2" fill="currentColor" opacity=".35" />
+          <rect x="21.5" y="3" width="7.5" height="7.5" rx="2.2" fill="currentColor" />
+          <rect x="3" y="12.25" width="7.5" height="7.5" rx="2.2" fill="currentColor" opacity=".35" />
+          <rect x="12.25" y="12.25" width="7.5" height="7.5" rx="2.2" fill="currentColor" />
+          <rect x="21.5" y="12.25" width="7.5" height="7.5" rx="2.2" fill="currentColor" />
+          <rect x="3" y="21.5" width="7.5" height="7.5" rx="2.2" fill="currentColor" />
+          <rect x="12.25" y="21.5" width="7.5" height="7.5" rx="2.2" fill="currentColor" />
+          <rect x="21.5" y="21.5" width="7.5" height="7.5" rx="2.2" fill="currentColor" opacity=".35" />
+        </svg>
+        <div>
+          <span class="brand-name">Habit Grid</span>
+          <span class="brand-date" id="today-label"></span>
+        </div>
+      </div>
+      <nav class="top-actions" aria-label="App">
+        <button type="button" class="ghost-btn" id="export-btn" aria-label="Export"><span data-icon="download"></span><span class="hide-sm">Export</span></button>
+        <button type="button" class="ghost-btn" id="import-btn" aria-label="Import"><span data-icon="upload"></span><span class="hide-sm">Import</span></button>
+        <input type="file" id="import-file" accept="application/json,.json" hidden />
+        <button type="button" class="icon-btn" id="theme-btn" aria-label="Switch theme"></button>
+        <button type="button" class="primary-btn" id="add-btn" aria-label="New habit" aria-keyshortcuts="N"><span data-icon="plus"></span><span>New habit</span></button>
+      </nav>
+    </header>
+
+    <main class="page">
+      <h1 class="visually-hidden">Habit Grid</h1>
+      <div class="overview">
+        <section class="card board-card" aria-labelledby="board-heading">
+          <div class="card-head">
+            <div class="head-text">
+              <h2 id="board-heading" tabindex="-1">This week</h2>
+              <p class="subtle" id="week-range"></p>
+            </div>
+            <p class="example-chip" id="example-chip" hidden>
+              <span>Example data</span><span aria-hidden="true">·</span
+              ><button type="button" id="clear-example">Clear</button>
+            </p>
+            <div class="week-nav">
+              <button type="button" class="icon-btn small" id="prev-week" aria-label="Previous week" data-icon="left"></button>
+              <button type="button" class="chip-btn" id="this-week">Today</button>
+              <button type="button" class="icon-btn small" id="next-week" aria-label="Next week" data-icon="right"></button>
+            </div>
+          </div>
+          <div class="board-wrap">
+            <table class="board" id="board">
+              <caption class="visually-hidden">Habits done each day this week. Press a day to tick or untick it.</caption>
+              <thead id="board-head"></thead>
+              <tbody id="board-body"></tbody>
+            </table>
+          </div>
+          <div class="empty" id="empty" hidden>
+            <p class="empty-title">No habits yet</p>
+            <p class="subtle">Add the first thing you want to do regularly. Tick it off each day and watch the grid fill up.</p>
+            <button type="button" class="primary-btn" id="empty-add"><span data-icon="plus"></span><span>New habit</span></button>
+          </div>
+        </section>
+
+        <section class="card summary-card" aria-labelledby="summary-heading">
+          <h2 id="summary-heading">Today</h2>
+          <div class="today-ring-row">
+            <svg class="today-ring" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+              <circle cx="60" cy="60" r="50" class="ring-track" />
+              <circle cx="60" cy="60" r="50" class="ring-fill" id="today-ring" transform="rotate(-90 60 60)" />
+            </svg>
+            <div>
+              <p class="big" id="today-count">0 of 0</p>
+              <p class="subtle" id="today-note">habits ticked today</p>
+            </div>
+          </div>
+          <dl class="summary-stats">
+            <div>
+              <dt>This week</dt>
+              <dd id="week-rate">0%</dd>
+              <dd class="subtle small" id="week-rate-note">of weekly targets</dd>
+            </div>
+            <div>
+              <dt>Longest streak</dt>
+              <dd id="top-streak">0 days</dd>
+              <dd class="subtle small ellipsis" id="top-streak-name">No streak yet</dd>
+            </div>
+            <div>
+              <dt>Past year</dt>
+              <dd id="year-total">0</dd>
+              <dd class="subtle small">check-ins</dd>
+            </div>
+          </dl>
+        </section>
+      </div>
+
+      <section class="year-section" aria-labelledby="year-heading">
+        <div class="section-head">
+          <h2 id="year-heading">The past year</h2>
+          <p class="legend" aria-hidden="true"><span class="legend-cell"></span>Not done <span class="legend-cell on"></span>Done</p>
+        </div>
+        <ol class="year-list" id="year-list"></ol>
+        <details class="archived" id="archived" hidden>
+          <summary id="archived-summary">Archived habits</summary>
+          <ul id="archived-list"></ul>
+        </details>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>
+        <kbd>N</kbd> new habit <span aria-hidden="true">·</span> <kbd>1</kbd>–<kbd>9</kbd> tick a habit for today
+        <span aria-hidden="true">·</span> arrow keys move around the week grid <span aria-hidden="true">·</span> data stays in
+        this browser
+      </p>
+    </footer>
+
+    <dialog id="habit-dialog" aria-labelledby="habit-dialog-title">
+      <form id="habit-form" novalidate>
+        <div class="dialog-head">
+          <h2 id="habit-dialog-title">New habit</h2>
+          <button type="button" class="icon-btn small" aria-label="Close" data-icon="close" data-close></button>
+        </div>
+        <label class="field">
+          <span>Name</span>
+          <input type="text" name="name" maxlength="60" required autocomplete="off" placeholder="For example: Drink a glass of water" />
+          <span class="field-error" id="name-error" hidden>Give the habit a name.</span>
+        </label>
+        <fieldset class="field">
+          <legend>Colour</legend>
+          <div class="swatches" id="swatches"></div>
+        </fieldset>
+        <label class="field">
+          <span>Goal</span>
+          <select name="target">
+            <option value="7">Every day</option>
+            <option value="6">6 times a week</option>
+            <option value="5">5 times a week</option>
+            <option value="4">4 times a week</option>
+            <option value="3">3 times a week</option>
+            <option value="2">2 times a week</option>
+            <option value="1">Once a week</option>
+          </select>
+        </label>
+        <div class="dialog-actions">
+          <div class="dialog-actions-left" id="edit-actions">
+            <button type="button" class="ghost-btn" id="archive-btn"><span data-icon="archive"></span>Archive</button>
+            <button type="button" class="ghost-btn danger" id="delete-btn"><span data-icon="trash"></span>Delete</button>
+          </div>
+          <button type="button" class="ghost-btn" data-close>Cancel</button>
+          <button type="submit" class="primary-btn">Save</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="confirm-dialog" aria-labelledby="confirm-title" aria-describedby="confirm-message">
+      <div class="dialog-body">
+        <h2 id="confirm-title">Are you sure?</h2>
+        <p id="confirm-message" class="subtle"></p>
+        <div class="dialog-actions">
+          <button type="button" class="ghost-btn" id="confirm-no">Cancel</button>
+          <button type="button" class="primary-btn danger-fill" id="confirm-yes">Confirm</button>
+        </div>
+      </div>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
